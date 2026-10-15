@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="น้ำประปา">
+<title>บันทึกการใช้น้ำประปา</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#14213d;--muted:#5b6478;--line:#2b3a55;--head:#e6ebf3;--acc:#1d4ed8;--bad:#c62828;--inp:#fff;--ok:#1a7a3c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#171e2e;--ink:#e8ecf5;--muted:#9aa5bd;--line:#8fa0c0;--head:#212b40;--acc:#7aa2ff;--bad:#ff8a80;--inp:#101726;--ok:#57c17e}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#171e2e;--ink:#e8ecf5;--muted:#9aa5bd;--line:#8fa0c0;--head:#212b40;--acc:#7aa2ff;--bad:#ff8a80;--inp:#101726;--ok:#57c17e}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Sarabun',system-ui,sans-serif;font-size:15px}
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 28px}
+h1{font-size:19px;margin:0 0 2px}
+.sub{color:var(--muted);margin:0 0 12px;font-size:13px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar .fld{display:flex;flex-direction:column;gap:2px;flex:1;min-width:110px}
+.bar .fld.small{flex:0 0 74px;min-width:0}
+.bar label{font-weight:600;font-size:12px;color:var(--muted)}
+input{font:inherit;color:var(--ink);background:var(--inp);border:1px solid var(--line);border-radius:6px;padding:7px 8px;width:100%;min-width:0}
+input:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:8px 12px;cursor:pointer}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.sum b{display:block;font-size:20px;color:var(--acc)}
+.sum span{font-size:12px;color:var(--muted)}
+#status{font-size:12px;color:var(--ok);height:16px;margin:-6px 0 8px;transition:opacity .3s;opacity:0}
+#status.show{opacity:1}
+.days{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dnum{font-weight:700;background:var(--head);border-radius:6px;padding:3px 9px;font-size:13px;white-space:nowrap}
+.chead input{flex:1;font-size:13px;padding:6px 8px}
+.meter{margin-bottom:8px}
+.meter:last-of-type{margin-bottom:0}
+.mtitle{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.row3{display:grid;grid-template-columns:1fr 1fr 66px;gap:6px;align-items:end}
+.row3 .g{display:flex;flex-direction:column;gap:2px}
+.row3 label{font-size:10px;color:var(--muted)}
+.row3 input{text-align:center;padding:6px 4px;font-variant-numeric:tabular-nums}
+.row3 input::placeholder{color:var(--muted);opacity:.6}
+.use{background:var(--head);border-radius:6px;padding:6px 2px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;align-self:stretch;display:flex;align-items:center;justify-content:center;font-size:13px}
+.use.neg{color:var(--bad)}
+.use small{display:block;font-weight:400;font-size:9px;color:var(--muted)}
+.hint{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>บันทึกการใช้น้ำประปา</h1>
+<p class="sub">หน่วย ผชย.บน.5 · กรอกเลขมิเตอร์ครั้งหลัง ระบบคำนวณจำนวนที่ใช้ให้อัตโนมัติ</p>
+<div class="bar">
+<div class="fld"><label for="month">ประจำเดือน</label><input id="month" placeholder="เช่น กันยายน 69"></div>
+<div class="fld small"><label for="days">จำนวนวัน</label><input id="days" type="number" min="28" max="31" value="30"></div>
+<button id="clr" style="align-self:flex-end">ล้างข้อมูล</button>
+</div>
+<div class="sum">
+<div><span>มาตรวัด 1 (สำนักงาน) รวม ลบ.ม.</span><b id="s1">0.00</b></div>
+<div><span>มาตรวัด 2 (น้ำประปาฉุกเฉิน) รวม ลบ.ม.</span><b id="s2">0.000</b></div>
+</div>
+<div id="status">บันทึกแล้ว</div>
+<div class="days" id="days-list"></div>
+<p class="hint">ครั้งก่อนของแต่ละวันดึงจากครั้งหลังของวันก่อนหน้าให้อัตโนมัติ (ตัวเลขจาง) พิมพ์ทับได้ถ้าเลขไม่ต่อเนื่อง · ค่าติดลบขึ้นสีแดง · ข้อมูลบันทึกอัตโนมัติในเบราว์เซอร์นี้ทุกครั้งที่พิมพ์ (ใช้ลิงก์เดิมเสมอ อย่าเปิดผ่านโหมดส่วนตัว/ไม่บันทึกประวัติ ไม่งั้นข้อมูลจะไม่ถูกจำ)</p>
+</div>
+<script>
+var KEY='watermeter-v1', S={month:'',days:30,rows:[]};
+try{var raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw)}catch(e){}
+function blank(){return{b1:'',a1:'',b2:'',a2:'',n:''}}
+if(!S.rows)S.rows=[];
+while(S.rows.length<31)S.rows.push(blank());
+if(!S.days)S.days=30;
+var statusTimer=null;
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(S));
+    var st=document.getElementById('status');
+    st.classList.add('show');
+    clearTimeout(statusTimer);
+    statusTimer=setTimeout(function(){st.classList.remove('show')},1200);
+  }catch(e){}
+}
+function num(v){var x=parseFloat(v);return isNaN(x)?null:x}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+var list=document.getElementById('days-list');
+
+function build(){
+  list.innerHTML='';
+  for(var i=0;i<S.days;i++){
+    var card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=
+      '<div class="chead"><span class="dnum">วันที่ '+(i+1)+'</span>'+
+        '<input data-i="'+i+'" data-k="n" placeholder="หมายเหตุ / ผู้บันทึก" value="'+esc(S.rows[i].n)+'"></div>'+
+      meterBlock(i,1,'มาตรวัด 1 (สำนักงาน)','b1','a1')+
+      meterBlock(i,2,'มาตรวัด 2 (น้ำประปาฉุกเฉิน)','b2','a2');
+    list.appendChild(card);
+  }
+  calc();
+}
+function meterBlock(i,n,title,bk,ak){
+  return '<div class="meter"><div class="mtitle">'+title+'</div><div class="row3">'+
+    '<div class="g"><label>ครั้งก่อน</label><input inputmode="decimal" data-i="'+i+'" data-k="'+bk+'" value="'+esc(S.rows[i][bk])+'"></div>'+
+    '<div class="g"><label>ครั้งหลัง</label><input inputmode="decimal" data-i="'+i+'" data-k="'+ak+'" value="'+esc(S.rows[i][ak])+'"></div>'+
+    '<div class="use" id="u'+n+'_'+i+'"><span></span><small>ใช้ ลบ.ม.</small></div>'+
+    '</div></div>';
+}
+function eff(i,b,a){
+  var v=num(S.rows[i][b]);
+  if(v===null&&i>0)v=num(S.rows[i-1][a]);
+  return v;
+}
+function calc(){
+  var t1=0,t2=0;
+  for(var i=0;i<S.days;i++){
+    [['1','b1','a1',2],['2','b2','a2',3]].forEach(function(m){
+      var b=eff(i,m[1],m[2]),a=num(S.rows[i][m[2]]),u=document.getElementById('u'+m[0]+'_'+i);
+      var bi=list.querySelector('input[data-i="'+i+'"][data-k="'+m[1]+'"]');
+      if(bi&&!num(S.rows[i][m[1]]))bi.placeholder=(i>0&&num(S.rows[i-1][m[2]])!==null)?String(S.rows[i-1][m[2]]):'';
+      if(u){
+        if(b!==null&&a!==null){
+          var d=a-b;
+          u.querySelector('span').textContent=d.toFixed(m[3]);
+          u.classList.toggle('neg',d<0);
+          if(m[0]==='1')t1+=d;else t2+=d;
+        }else{u.querySelector('span').textContent='—';u.classList.remove('neg')}
+      }
+    });
+  }
+  var s1=t1.toFixed(2),s2=t2.toFixed(3);
+  document.getElementById('s1').textContent=s1;
+  document.getElementById('s2').textContent=s2;
+}
+list.addEventListener('input',function(e){
+  var t=e.target,i=+t.dataset.i,k=t.dataset.k;
+  if(isNaN(i)||!k)return;
+  S.rows[i][k]=t.value;save();calc();
+});
+var mo=document.getElementById('month'),dy=document.getElementById('days');
+mo.value=S.month||'';dy.value=S.days;
+mo.addEventListener('input',function(){S.month=mo.value;save()});
+dy.addEventListener('change',function(){
+  var v=Math.min(31,Math.max(28,parseInt(dy.value)||30));dy.value=v;S.days=v;save();build();
+});
+document.getElementById('clr').addEventListener('click',function(){
+  if(!confirm('ล้างข้อมูลทั้งเดือน?'))return;
+  S.rows=[];while(S.rows.length<31)S.rows.push(blank());S.month='';mo.value='';save();build();
+});
+build();
+</script>
+</body>
+</html>
